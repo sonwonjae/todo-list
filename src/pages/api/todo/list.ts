@@ -17,6 +17,11 @@ export default async function handler(
         res(null);
       }, 1000);
     });
+
+    if (Math.random() > 0.3) {
+      throw new Error("manual luke server response error");
+    }
+
     const todos = await find({ name: "todos" });
     res.status(200).json({ todos });
   }
