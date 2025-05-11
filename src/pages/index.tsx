@@ -1,10 +1,19 @@
-import Todos from "@/components/Todos";
-import { TodosProvider } from "@/contexts/todos";
+import dynamic from "next/dynamic";
+import { Suspense } from "react";
+
+const Todos = dynamic(
+  () => {
+    return import("@/components/Todos");
+  },
+  {
+    ssr: false,
+  },
+);
 
 export default function Home() {
   return (
-    <TodosProvider>
+    <Suspense fallback={<div>로딩중......</div>}>
       <Todos />
-    </TodosProvider>
+    </Suspense>
   );
 }

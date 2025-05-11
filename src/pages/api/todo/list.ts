@@ -12,6 +12,11 @@ export default async function handler(
   res: NextApiResponse<TodosRes>,
 ) {
   if (req.method === "GET") {
+    await new Promise((res) => {
+      setTimeout(() => {
+        res(null);
+      }, 1000);
+    });
     const todos = await find({ name: "todos" });
     res.status(200).json({ todos });
   }

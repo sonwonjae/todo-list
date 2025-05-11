@@ -1,9 +1,34 @@
-import React, { FormEventHandler } from "react";
+import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
+import axios from "axios";
+import React, { ChangeEventHandler, FormEventHandler, useState } from "react";
 
-import { useTodosContext } from "@/contexts/todos";
+import { TodosRes } from "@/pages/api/todo/list";
 
 function TodoForm() {
-  const { title, changeTitle, todoInsertRes, insertTodo } = useTodosContext();
+  const { refetch } = useSuspenseQuery({
+    queryKey: ["/api/todo/list"],
+    queryFn: async () => {
+      const { data } = await axios<TodosRes>("/api/todo/list");
+      return data.todos;
+    },
+  });
+
+  const [title, setTitle] = useState("");
+  const changeTitle: ChangeEventHandler<HTMLInputElement> = (e) => {
+    setTitle(e.target.value);
+  };
+
+  const { isPending, mutateAsync: insertTodo } = useMutation({
+    mutationFn: async () => {
+      setTitle("");
+      await axios.post("/api/todo", {
+        todo: {
+          title,
+        },
+      });
+      await refetch();
+    },
+  });
 
   const submit: FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
@@ -14,7 +39,7 @@ function TodoForm() {
     <form onSubmit={submit}>
       <input
         autoFocus
-        disabled={todoInsertRes.isFetching}
+        disabled={isPending}
         value={title}
         onChange={changeTitle}
       />

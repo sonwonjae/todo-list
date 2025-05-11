@@ -1,32 +1,43 @@
-import React, { useEffect } from "react";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import axios from "axios";
+import React from "react";
 
-import { useTodosContext } from "@/contexts/todos";
+import { TodosRes } from "@/pages/api/todo/list";
 
 import Todo from "./Todo";
 import TodoForm from "./TodoForm";
 
 function Todos() {
-  const { todosRes, fetchTodos } = useTodosContext();
-  useEffect(() => {
-    fetchTodos();
-  }, []);
+  const { data: todos, isFetching } = useSuspenseQuery({
+    queryKey: ["/api/todo/list"],
+    queryFn: async () => {
+      const { data } = await axios<TodosRes>("/api/todo/list");
+      return data.todos;
+    },
+  });
 
-  const isLoading = todosRes.isFetching || todosRes.data === null;
-  if (isLoading) {
-    return <div>로딩 중...</div>;
+  const isEmpty = !todos.length;
+
+  if (isFetching) {
+    return (
+      <div>
+        <div>로딩 중...</div>
+        <TodoForm />
+      </div>
+    );
   }
-
-  const isEmpty = !todosRes.isFetching && !todosRes.data?.todos.length;
 
   return (
     <div>
       {isEmpty && <div>아직 Todo를 생성하지 않았습니다.</div>}
-      <ul className="todo-list">
-        {!isEmpty &&
-          todosRes.data?.todos.map((todo) => {
-            return <Todo key={todo.id} {...todo} />;
-          })}
-      </ul>
+      {!isEmpty && (
+        <ul className="todo-list">
+          {!isEmpty &&
+            todos.map((todo) => {
+              return <Todo key={todo.id} {...todo} />;
+            })}
+        </ul>
+      )}
       <TodoForm />
     </div>
   );

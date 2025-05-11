@@ -22,7 +22,7 @@ export const insert: Insert = async ({ name, draft }) => {
       createdAt,
       updatedAt: createdAt,
     });
-    await fs.writeFile(route, JSON.stringify(table, null, '\t'), "utf-8");
+    await fs.writeFile(route, JSON.stringify(table, null, "\t"), "utf-8");
     return { result: "success" };
   } else {
     return { result: "fail" };
