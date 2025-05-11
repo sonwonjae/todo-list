@@ -1,3 +1,10 @@
+import Todos from "@/components/Todos";
+import { TodosProvider } from "@/contexts/todos";
+
 export default function Home() {
-  return <div></div>;
+  return (
+    <TodosProvider>
+      <Todos />
+    </TodosProvider>
+  );
 }
