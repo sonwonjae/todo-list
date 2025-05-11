@@ -5,16 +5,16 @@ import { DB } from "../types";
 
 import { Find } from "./types";
 
-export const find: Find = async ({ name, query }) => {
+export const find: Find = async ({ name, query, options }) => {
   type Table = DB[typeof name];
   type Document = Table[number];
   type FieldName = keyof Document;
 
   const route = path.resolve(process.cwd(), `src/mocks/data/${name}.json`);
-  const table: Table = JSON.parse(await fs.readFile(route, "utf8"));
+  let table: Table = JSON.parse(await fs.readFile(route, "utf8"));
 
   if (typeof query === "object") {
-    const filteredTable = table.filter((document) => {
+    table = table.filter((document) => {
       const isTarget = (() => {
         const target = Object.entries(query);
         if (target.length === 0) {
@@ -27,8 +27,19 @@ export const find: Find = async ({ name, query }) => {
 
       return !isTarget;
     });
+  }
 
-    return filteredTable;
+  if (typeof options === "object") {
+    if (typeof options.page === "number") {
+      if (typeof options.limit === "number") {
+        table = table.slice(options.page * options.limit);
+      } else {
+        table = table.slice(options.page);
+      }
+    }
+    if (typeof options.limit === "number") {
+      table = table.slice(0, options.limit);
+    }
   }
 
   return table;

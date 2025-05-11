@@ -1,20 +1,21 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
-import axios from "axios";
+import { useRouter } from "next/router";
 import React from "react";
 
-import { TodosRes } from "@/pages/api/todo/list";
+import generator from "@/queries/api/todo/list/options";
 
 import Todo from "./Todo";
 import TodoForm from "./TodoForm";
 
 function Todos() {
-  const { data: todos, isFetching } = useSuspenseQuery({
-    queryKey: ["/api/todo/list"],
-    queryFn: async () => {
-      const { data } = await axios<TodosRes>("/api/todo/list");
-      return data.todos;
-    },
-  });
+  const router = useRouter();
+
+  const { data: todos, isFetching } = useSuspenseQuery(
+    generator({
+      page: Number(router.query?.page) || 0,
+      limit: Number(router.query?.limit) || 10,
+    }),
+  );
 
   const isEmpty = !todos.length;
 
@@ -22,7 +23,6 @@ function Todos() {
     return (
       <div>
         <div>로딩 중...</div>
-        <TodoForm />
       </div>
     );
   }
@@ -38,6 +38,43 @@ function Todos() {
             })}
         </ul>
       )}
+      <div
+        style={{
+          display: "flex",
+          width: "100%",
+          justifyContent: "space-between",
+          marginBottom: "16px",
+        }}
+      >
+        <button
+          style={{
+            background: "#EEEEEE",
+            padding: "8px 16px",
+          }}
+          onClick={() => {
+            const page = Number(router.query.page) || 0;
+            router.push(
+              `?page=${page > 0 ? page - 1 : 0}&limit=${Number(router.query.limit) || 0}`,
+            );
+          }}
+        >
+          prev
+        </button>
+        <button
+          style={{
+            background: "#EEEEEE",
+            padding: "8px 16px",
+          }}
+          onClick={() => {
+            const page = Number(router.query.page) || 0;
+            router.push(
+              `?page=${page + 1}&limit=${Number(router.query.limit) || 0}`,
+            );
+          }}
+        >
+          next
+        </button>
+      </div>
       <TodoForm />
     </div>
   );

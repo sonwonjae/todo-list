@@ -18,11 +18,13 @@ export default async function handler(
       }, 1000);
     });
 
-    if (Math.random() > 0.3) {
-      throw new Error("manual luke server response error");
-    }
-
-    const todos = await find({ name: "todos" });
+    const todos = await find({
+      name: "todos",
+      options: {
+        page: Number(req.query.page) || 0,
+        limit: Number(req.query.limit) || 10,
+      },
+    });
     res.status(200).json({ todos });
   }
 }

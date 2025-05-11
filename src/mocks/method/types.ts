@@ -10,8 +10,17 @@ type Draft<N extends DBName> = Omit<
 >;
 type Query<N extends DBName> = Partial<DB[N][number]>;
 
+interface Options {
+  page?: number;
+  limit?: number;
+}
+
 export interface Find {
-  <N extends DBName>(param: { name: N; query?: Query<N> }): Promise<DB[N]>;
+  <N extends DBName>(param: {
+    name: N;
+    query?: Query<N>;
+    options?: Options;
+  }): Promise<DB[N]>;
 }
 
 export interface Insert {

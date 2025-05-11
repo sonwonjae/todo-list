@@ -1,17 +1,19 @@
 import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import axios from "axios";
+import { useRouter } from "next/router";
 import React, { ChangeEventHandler, FormEventHandler, useState } from "react";
 
-import { TodosRes } from "@/pages/api/todo/list";
+import generator from "@/queries/api/todo/list/options";
 
 function TodoForm() {
-  const { refetch } = useSuspenseQuery({
-    queryKey: ["/api/todo/list"],
-    queryFn: async () => {
-      const { data } = await axios<TodosRes>("/api/todo/list");
-      return data.todos;
-    },
-  });
+  const router = useRouter();
+
+  const { refetch } = useSuspenseQuery(
+    generator({
+      page: Number(router.query?.page) || 0,
+      limit: Number(router.query?.limit) || 10,
+    }),
+  );
 
   const [title, setTitle] = useState("");
   const changeTitle: ChangeEventHandler<HTMLInputElement> = (e) => {
